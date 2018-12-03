@@ -27,11 +27,14 @@ metadata {
 	}
 	tiles(scale: 2) {
 		standardTile("switch", "device.switch", width: 6, height: 4, canChangeIcon: true) {
-        	state "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#00a0dc",nextState:"turningOff"
-			state "off", label:'${name}', action:"switch.on", icon:"st.switch.off", backgroundColor:"#ffffff",nextState:"waiting"
-			state "turningOff", label:'waiting', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#15EE10",nextState:"waiting"
-			state "waiting", label:'${name}', action:"switch.on", icon:"st.switches.switch.on", backgroundColor:"#15EE10",nextState:"on"
-			state "offline", label:'Comms Error', action:"switch.on", icon:"st.switch.off", backgroundColor:"#e86d13",nextState:"waiting"
+//ECallegari        	state "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#00a0dc",nextState:"turningOff"
+        	state "on", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#00a0dc",nextState:"waiting"
+            state "off", label:'${name}', action:"switch.on", icon:"st.switch.off", backgroundColor:"#ffffff",nextState:"waiting"
+//ECallegari			state "turningOff", label:'waiting', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#15EE10",nextState:"waiting"
+//ECallegari			state "turningOff", label:'${name}', action:"switch.off", icon:"st.switches.switch.on", backgroundColor:"#15EE10",nextState:"waiting"
+//ECallegari			state "waiting", label:'${name}', action:"switch.on", icon:"st.switches.switch.on", backgroundColor:"#15EE10",nextState:"on"
+			state "waiting", label:'${name}', action:"switch.on", icon:"st.switches.switch.on", backgroundColor:"#15EE10",nextState:"waiting"
+            state "offline", label:'Comms Error', action:"switch.on", icon:"st.switch.off", backgroundColor:"#e86d13",nextState:"waiting"
 		}
 		standardTile("refresh", "capability.refresh", width: 3, height: 2,  decoration: "flat") {
 			state ("default", label:"Refresh", action:"refresh.refresh", icon:"st.secondary.refresh")
@@ -70,10 +73,10 @@ def onOffResponse(response){
 		log.error "$device.name $device.label: Communications Error"
 		sendEvent(name: "switch", value: "offline", descriptionText: "ERROR - OffLine - mod onOffResponse")
 	} else {
-    	if (response.headers["cmd-response"] == "true") {
+//ECallegari    	if (response.headers["cmd-response"] == "true") {
             def cmd = response.headers["tuyapi-onoff"]
         	sendEvent(name: "switch", value: cmd, isStateChange: true)
-            }
+//ECallegari            }
     }
 	//refresh()
 }
@@ -88,7 +91,8 @@ def refreshResponse(response){
 		log.error "$device.name $device.label: Communications Error"
 		sendEvent(name: "switch", value: "offline", descriptionText: "ERROR - OffLine - mod onOffResponse")
 	} else {
-        def status = response.headers["cmd-response"]
+//        def status = response.headers["cmd-response"]
+           def status = response.headers["tuyapi-onoff"]
 		log.info "${device.name} ${device.label}: Power: ${status}"
 		sendEvent(name: "switch", value: status)
 	}
