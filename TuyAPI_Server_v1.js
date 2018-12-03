@@ -4,6 +4,9 @@ TuyAPI node.js
 Derived from
 Dave Gutheinz's TP-LinkHub - Version 1.0
 
+Forked and updated to work with latestcodetheweb/tuyapi
+-Ecallegari
+
 */
 
 //##### Options for this program ###################################
@@ -73,67 +76,82 @@ function processDeviceCommand(request, response) {
 	var localKey = request.headers["tuyapi-localkey"]
 	var command =  request.headers["tuyapi-command"]
 
-	var respMsg = "deviceCommand sending to IP: " + deviceIP + " Command: " + command
+//ec        var dps = request.headers["dps"]
+//ec        var action = request.headers["action"]
+
+//#################################################
+//ADDED LINES
+//ec	var deviceNo = request.headers["deviceno"]
+//ec	response.setHeader("deviceNo", deviceNo)
+//#################################################
+//ec	response.setHeader("action", action)
+
+	var respMsg = "deviceCommand sending to IP: " + deviceIP + " Command: " + command 
+
 	console.log(respMsg)
 
 	var tuya = new TuyaDevice({
-	  type: 'outlet',
-	  ip: deviceIP,
+//	  type: 'outlet',
 	  id: deviceID,
-	  key: localKey});
+	  key: localKey,
+	  ip: deviceIP
+	  });
 
 	switch(command) {
 		case "off":
-			tuya.setStatus(0, function(error, result) {
-		    	  if (error) { 
-				    tuya.destroy();
-		    	  	return console.log("TUYAPI Error: " + error); 
-		    	  }
-		          console.log('Result of setting status to 0 : ' + result);
-				  response.setHeader("tuyapi-onoff", "off");
-				  response.setHeader("cmd-response", result);
-				  response.end();
-				  console.log("Status (off) sent to SmartThings.");
-				  tuya.destroy();
+	
+		tuya.get().then(status => {
+			console.log('Status:', status);
+
+	  	tuya.set({set: false}).then(result => {
+    			console.log('Result of setting status to off: ' + result);
+			response.setHeader("cmd-response", !status );
+	    		response.setHeader("tuyapi-onoff", "off");
+			console.log("Status (off) sent to SmartThings.");
+			response.end();
+			return;
 			});
+		});
 		break
 
 		case "on":
-			tuya.setStatus(1, function(error, result) {
-		          if (error) { 
-				    tuya.destroy();
-		    	  	return console.log("TUYAPI Error: " + error); 
-		    	  }
-		          console.log('Result of setting status to 1 : ' + result);
-		          response.setHeader("tuyapi-onoff", "on");
-				  response.setHeader("cmd-response", result)
-				  response.end();
-				  console.log("Status (on) sent to SmartThings.");
-				  tuya.destroy();
-			});		
+		tuya.get().then(status => {
+			console.log('Status:', status);
+
+	  	tuya.set({set: true}).then(result => {
+    			console.log('Result of setting status to on: ' + result);
+			response.setHeader("cmd-response", !status );
+	    		response.setHeader("tuyapi-onoff", "on");
+			console.log("Status (on) sent to SmartThings.");
+			response.end();
+			return;
+			});
+		});
+
 		break
 
 		case "status":
-			tuya.getStatus(function(error, status) {
-				if (error) { 
-				       tuya.destroy();
-		    	  	   return console.log("TUYAPI Error: " + error); 
-		    	}
-				if (status == true) {
-					status = "on";
-				} else {
-					status = "off";
-				}
-				response.setHeader("cmd-response", status );
-				console.log("Status (" + status + ") sent to SmartThings.");
-				response.end();
-				tuya.destroy();
-			});
+    		tuya.get().then(status => {
+			console.log('New status:', status);
+			
+			response.setHeader("cmd-response", status);
+			if (status == "true") {
+				response.setHeader("tuyapi-onoff", "on");
+			}
+			else if (status == "false") {
+				response.setHeader("tuyapi-onoff", "off");
+			}
+			//response.setHeader("tuyapi-onoff", status);
+			console.log("Status (" + status + ") sent to SmartThings.");
+			response.end();
+			return;// Ecallegari
+		});
 		break
 
 		default:
-			tuya.destroy();
+//ecallegari			tuya.destroy();
 			console.log('Unknown request');
+			return; //Eugene
 	
 	}  	
 }
@@ -144,3 +162,4 @@ function logResponse(respMsg) {
 		fs.appendFileSync("error.log", "\r" + respMsg)
 	}
 }
+
