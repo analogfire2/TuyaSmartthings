@@ -12,6 +12,11 @@ Currently PARTIALLY functional SmartThings device handler and node.js script for
 
 Device Handler and Node script hacked together using DaveGut's TPLink script as a starting point.
 
+## Update
+ECallegari
+-Updated the node.js file to work with latest codetheweb/tuyapi
+-Updated the DTH to match with the updated node.js 
+
 ## Credits
 
 Tuya/Smart Life
